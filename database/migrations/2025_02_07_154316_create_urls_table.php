@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('urls', function (Blueprint $table) {
             $table->id();
             $table->string('session_id');
-            $table->integer('count_visits');
+            $table->integer('count_visits')->default(0);
             $table->string('short_url')->unique();
             $table->string('original_url');
             $table->timestamps();
