@@ -5,18 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Url;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Route;
 use Illuminate\View\View;
 
 class UrlController extends Controller
 {
-    public function storeShortUrl(Request $request): RedirectResponse
+    public function createShortUrl(): RedirectResponse
     {
-        $request->validate(['original_url' => 'required|url']);
+        request()->validate(['original_url' => 'required|url']);
 
         Url::create([
             'original_url' => request('original_url'),
-            'short_url' => Url::generateShortUrl($request),
+            'short_url' => Url::generateShortUrl(str_replace(' ', '', request('custom_short_url'))),
             'session_id' => session()->getId(),
         ]);
 
@@ -30,6 +29,19 @@ class UrlController extends Controller
 
     public function redirectToOriginalUrl(Request $request): RedirectResponse
     {
-        return redirect()->away(Url::getOriginalUrl($request));
+        $url = Url::getUrl();
+
+        $url->increment('count_visits');
+
+        return redirect()->away($url->original_url);
     }
+
+    public function deleteShortUrl(Url $url): RedirectResponse
+    {
+        $url->delete();
+
+        return redirect('/');
+    }
+
+
 }
