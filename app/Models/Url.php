@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class Url extends Model
 {
@@ -13,11 +13,24 @@ class Url extends Model
         'original_url',
         'short_url',
         'session_id',
+        'count_visits',
     ];
 
-    public static function generateShortUrl(): string
+    public static function generateShortUrl(?string $custom_short_url): string
     {
-        return url(Str::random(3));
+
+        if (empty($custom_short_url)) {
+            return url(Str::random(3));
+        }
+
+        if (self::where('short_url', url($custom_short_url))->exists()) {
+            throw ValidationException::withMessages([
+                'custom_short_url' => 'The short URL already exists',
+            ]);
+        }
+
+        return url($custom_short_url);
+
     }
 
 
@@ -26,10 +39,12 @@ class Url extends Model
         return self::all()->where('session_id', session()->getId())->sortByDesc('created_at');
     }
 
-    public static function getOriginalUrl(Request $request): string
+    public static function getUrl(): Url
     {
-        return self::where('short_url', request()->fullUrl())->first()->original_url;
+        if (!$url = self::where('short_url', request()->fullUrl())->first()) {
+            abort(404);
+        }
+        return $url;
     }
-
 
 }
