@@ -35,21 +35,18 @@ class Url extends Model
     }
 
 
-    private static
-    function existsUrl(string $url): bool
+    private static function existsUrl(string $url): bool
     {
         return self::where('short_url', url($url))->exists();
     }
 
 
-    public
-    static function getUrls()
+    public static function getUrls()
     {
         return self::all()->where('session_id', session()->getId())->sortByDesc('created_at');
     }
 
-    public
-    static function getUrl(): Url
+    public static function getUrl(): Url
     {
         if (!$url = self::where('short_url', request()->fullUrl())->first()) {
             abort(404);
