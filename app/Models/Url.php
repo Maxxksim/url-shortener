@@ -16,30 +16,40 @@ class Url extends Model
         'count_visits',
     ];
 
-    public static function generateShortUrl(?string $custom_short_url): string
+    public static function generateShortUrl(?string $custom_short_url = null): string
     {
+        if ($custom_short_url) {
 
-        if (empty($custom_short_url)) {
-            return url(Str::random(3));
+            if (static::existsUrl($custom_short_url)) {
+                throw ValidationException::withMessages(['custom_short_url' => 'The short URL already exists',]);
+            }
+
+            return url($custom_short_url);
         }
 
-        if (self::where('short_url', url($custom_short_url))->exists()) {
-            throw ValidationException::withMessages([
-                'custom_short_url' => 'The short URL already exists',
-            ]);
+        if (static::existsUrl($short_url = Str::random(3))) {
+            return static::generateShortUrl();
         }
 
-        return url($custom_short_url);
-
+        return url($short_url);
     }
 
 
-    public static function getUrls()
+    private static
+    function existsUrl(string $url): bool
+    {
+        return self::where('short_url', url($url))->exists();
+    }
+
+
+    public
+    static function getUrls()
     {
         return self::all()->where('session_id', session()->getId())->sortByDesc('created_at');
     }
 
-    public static function getUrl(): Url
+    public
+    static function getUrl(): Url
     {
         if (!$url = self::where('short_url', request()->fullUrl())->first()) {
             abort(404);
