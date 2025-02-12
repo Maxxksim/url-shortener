@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet"/>
 </head>
 <body class="bg-gray-800 text-gray-200 font-sans p-10 justify-items-center">
-<button data-action="click-me">Нажми меня</button>
+
 <div class="mt-6">
     <form method="POST" action="/url/create" class="text-center space-y-4">
         @csrf
